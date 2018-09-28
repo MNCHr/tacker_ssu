@@ -1,0 +1,52 @@
+tosca_definitions_version: tosca_simple_profile_for_nfv_1_0_0
+
+description: VyOS VNF
+
+metadata:
+  template_name: VyOS
+
+topology_template:
+  node_templates:
+    VDU1:
+      type: tosca.nodes.nfv.VDU.Tacker
+      capabilities:
+        nfv_compute:
+          properties:
+            num_cpus: 1
+            mem_size: 2048 MB
+            disk_size: 50 GB
+      properties:
+        image: VyOS
+        availability_zone: nova
+        mgmt_driver: noop
+        config: |
+          param0: key1
+          param1: key2
+        service_type: firewall
+        monitoring_policy:
+          name: ping
+          parameters:
+            monitoring_delay: 45
+            count: 3
+            interval: 1
+            timeout: 2
+          actions:
+            failure: respawn
+
+    CP1:
+      type: tosca.nodes.nfv.CP.Tacker
+      properties:
+        management: true
+        order: 0
+        anti_spoofing_protection: false
+      requirements:
+        - virtualLink:
+            node: VL1
+        - virtualBinding:
+            node: VDU1
+
+    VL1:
+      type: tosca.nodes.nfv.VL
+      properties:
+        network_name: net_mgmt
+        vendor: Tacker

@@ -1,0 +1,32 @@
+#!/bin/bash
+if [[ -f sample-vnffgd.yaml ]]; then
+    echo "Deleting VNFFG"
+##    openstack vnf graph delete sample-vnffg
+    tacker vnffg-delete sample-vnffg
+    echo "Deleting VNFFGD"
+##    openstack vnf graph descriptor delete sample-vnffgd
+    tacker vnffgd-delete sample-vnffgd
+    echo "Deleting sample sfc instances"
+    openstack server delete sfc_server sfc_client
+##    tacker server-delete sfc_server sfc_client
+fi
+echo "Deleting sample VNF"
+##openstack vnf delete sample-vnf
+tacker vnf-delete sample-vnf
+##while openstack vnf list | grep -q sample-vnf; do
+while tacker vnf-list | grep -q sample-vnf; do
+    sleep 1
+done
+echo "Deleting sample VNFD"
+##openstack vnf descriptor delete sample-vnfd
+tacker vnfd-delete sample-vnfd
+echo "Deleting sample VIM"
+openstack vim delete sample-vim
+echo "Deleting demo-net"
+openstack router remove subnet demo_router subdemo_net
+openstack network delete demo_net
+echo "Deleting demo-router"
+openstack router delete demo_router
+echo "Removing sample config"
+rm -rf ./sample-*
+
